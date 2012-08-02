@@ -13,35 +13,54 @@
  */
 class SG_iCal_TZMap {
     
-    private $availableMaps = array(
+    static protected $availableMaps = array(
     //  PRODID                     Mapping file
         'Microsoft Corporation' => 'microsoft',
     );
     
-    protected $map = array();
+    static protected $map = array();
     
     public function __construct($product) {
-        if (! array_key_exists($product, $this->availableMaps)) {
+        self::loadMap($product);
+    }
+    
+    static protected function loadMap($product) {
+        if (! array_key_exists($product, self::$availableMaps)) {
             throw new Exception("Mapping type '$product' not supported");
         }
         
-        $file = dirname(__FILE__) . '/../tz-map/' . $this->availableMaps[$product] . '.csv';
-        
-        if (($handle = fopen($file, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                if ( ! array_key_exists($data[0], $this->map ) ) {
-                    $this->map[$data[0]] = array();
+        if (count(self::$map) === 0) {
+            $file = dirname(__FILE__) . '/../tz-map/' . self::$availableMaps[$product] . '.csv';
+            
+            if (($handle = fopen($file, "r")) !== FALSE) {
+                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    if ( ! array_key_exists($data[0], self::$map ) ) {
+                        self::$map[$data[0]] = array();
+                    }
+                    
+                    self::$map[$data[0]][$data[1]] = $data[2];
                 }
-                
-                $this->map[$data[0]][$data[1]] = $data[2];
+                fclose($handle);
+            } else {
+                // Error
             }
-            fclose($handle);
-        } else {
-            // Error
         }
     }
     
-    public function map($fromTZ, $region='1') {
-        return $this->map[$fromTZ][$region];
+    static public function map($product, $fromTZ, $region='1') {
+        
+        self::loadMap($product);
+        
+        $cleanKey = trim($fromTZ, '"');
+        
+        if ( ! array_key_exists($cleanKey, self::$map) ) {
+            return $fromTZ;
+        } else {
+            return self::$map[$cleanKey][$region];
+        }
+    }
+    
+    public function debugShowMap() {
+        var_dump(count(self::$map));
     }
 }

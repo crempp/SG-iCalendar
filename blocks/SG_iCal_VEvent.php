@@ -36,6 +36,8 @@ class SG_iCal_VEvent {
 	public $freq; //getFrequency() SG_iCal_Freq
 
 	public $data;
+	
+	protected $ical_product;
 
 	/**
 	 * Constructs a new SG_iCal_VEvent. Needs the SG_iCalReader
@@ -44,7 +46,9 @@ class SG_iCal_VEvent {
 	 * @param SG_iCalReader $ical
 	 */
 	public function __construct($data, SG_iCal $ical) {
-
+		
+		$this->ical_product = $ical->sourceProduct;
+		
 		$this->uid = $data['uid']->getData();
 		unset($data['uid']);
 
@@ -265,7 +269,18 @@ class SG_iCal_VEvent {
 			if (!isset($this->previous_tz)) {
 				$this->previous_tz = @ date_default_timezone_get();
 			}
-			$this->tzid = $line['tzid'];
+			
+			//$tz_mapper = new SG_iCal_TZMap($this->ical_product);
+			
+			//$tz_mapper->debugShowMap();
+			//die();
+			
+			
+			//$this->tzid = $tz_mapper->map($line['tzid']);
+			$this->tzid = SG_iCal_TZMap::map($this->ical_product, $line['tzid']);
+			
+			//$this->tzid = $line['tzid'];
+			
 			date_default_timezone_set($this->tzid);
 			return true;
 		}
