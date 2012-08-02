@@ -270,18 +270,10 @@ class SG_iCal_VEvent {
 				$this->previous_tz = @ date_default_timezone_get();
 			}
 			
-			//$tz_mapper = new SG_iCal_TZMap($this->ical_product);
-			
-			//$tz_mapper->debugShowMap();
-			//die();
-			
-			
-			//$this->tzid = $tz_mapper->map($line['tzid']);
 			$this->tzid = SG_iCal_TZMap::map($this->ical_product, $line['tzid']);
 			
-			//$this->tzid = $line['tzid'];
-			
 			date_default_timezone_set($this->tzid);
+			
 			return true;
 		}
 		return false;
