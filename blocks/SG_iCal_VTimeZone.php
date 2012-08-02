@@ -23,12 +23,7 @@ class SG_iCal_VTimeZone {
         
 		// Handle potential timezone mapping
 		if ($ical) {
-			//$tz_mapper = new SG_iCal_TZMap($ical->sourceProduct);
-			//
-			//$this->tzid = $tz_mapper->map($data['tzid']);
-			
 			$this->tzid = SG_iCal_TZMap::map($ical->sourceProduct, $data['tzid']);
-			
 		} else {
 			$this->tzid = $data['tzid'];
 		}
