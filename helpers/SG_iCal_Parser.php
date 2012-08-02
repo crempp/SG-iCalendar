@@ -100,6 +100,13 @@ class SG_iCal_Parser {
 
 		foreach( $content AS $line ) {
 			$line = new SG_iCal_Line($line);
+			
+			// Grab the product - is this the best place to put this?
+			if ($line->getIdent() == 'prodid') {
+				$prod_parts =  explode('//', $line->getData());
+				$ical->sourceProduct =  $prod_parts[1];
+			}
+			
 			if( $line->isBegin() ) {
 				// New block of data, $section = new block
 				$section = strtolower($line->getData());

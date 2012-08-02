@@ -14,13 +14,25 @@ class SG_iCal_VTimeZone {
 	protected $standard;
 	protected $cache = array();
 
+	protected $ical = null;
 	/**
 	 * Constructs a new SG_iCal_VTimeZone
 	 */
-	public function __construct( $data ) {
+	public function __construct( $data , $ical = null ) {
 		require_once dirname(__FILE__).'/../helpers/SG_iCal_Freq.php'; // BUILD: Remove line
-
-		$this->tzid = $data['tzid'];
+        
+		// Handle potential timezone mapping
+		if ($ical) {
+			$tz_mapper = new SG_iCal_TZMap($ical->sourceProduct);
+			
+			//var_dump($data['tzid']); die();
+			var_dump($tz_mapper->map($data['tzid'])); die();
+			
+			$this->tzid = $tz_mapper->map($data['tzid']);
+		} else {
+			$this->tzid = $data['tzid'];
+		}
+		
 		$this->daylight = $data['daylight'];
 		$this->standard = $data['standard'];
 	}
