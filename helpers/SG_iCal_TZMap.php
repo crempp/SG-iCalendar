@@ -24,41 +24,57 @@ class SG_iCal_TZMap {
         self::loadMap($product);
     }
     
-    static protected function loadMap($product) {
-        if (! array_key_exists($product, self::$availableMaps)) {
-            throw new Exception("Mapping type '$product' not supported");
-        }
-        
-        if (count(self::$map) === 0) {
-            $file = dirname(__FILE__) . '/../tz-map/' . self::$availableMaps[$product] . '.csv';
-            
-            if (($handle = fopen($file, "r")) !== FALSE) {
-                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                    if ( ! array_key_exists($data[0], self::$map ) ) {
-                        self::$map[$data[0]] = array();
-                    }
-                    
-                    self::$map[$data[0]][$data[1]] = $data[2];
-                }
-                fclose($handle);
-            } else {
-                // Error
-            }
-        }
-    }
+    static protected function loadMap($product) 
+	{
+        if (self::needsMapping($product)){        
+			if (count(self::$map) === 0) {
+				$file = dirname(__FILE__) . '/../tz-map/' . self::$availableMaps[$product] . '.csv';
+				
+				if (($handle = fopen($file, "r")) !== FALSE) {
+					while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+						if ( ! array_key_exists($data[0], self::$map ) ) {
+							self::$map[$data[0]] = array();
+						}
+						
+						self::$map[$data[0]][$data[1]] = $data[2];
+					}
+					fclose($handle);
+				} else {
+					// Error
+				}
+			}
+		}
+	}
     
     static public function map($product, $fromTZ, $region='1') {
-        
-        self::loadMap($product);
-        
-        $cleanKey = trim($fromTZ, '"');
-        
-        if ( ! array_key_exists($cleanKey, self::$map) ) {
-            return $fromTZ;
-        } else {
-            return self::$map[$cleanKey][$region];
-        }
+        if (self::needsMapping($product)) { 
+			self::loadMap($product);
+			
+			$cleanKey = trim($fromTZ, '"');
+			
+			if ( ! array_key_exists($cleanKey, self::$map) ) {
+				return $fromTZ;
+			} else {
+				return self::$map[$cleanKey][$region];
+			}
+		}
+		else
+		{
+			return $fromTZ;
+		}
     }
+	
+	static protected function needsMapping($product)
+	{
+		if (array_key_exists($product, self::$availableMaps))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
     
     public function debugShowMap() {
         var_dump(count(self::$map));
